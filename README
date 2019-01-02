@@ -17,6 +17,15 @@ alias mojo='`which perl` -MDevel::SourceLib `which mojo` '
 alias prove='env PERL5LIB=`perl -MDevel::SourceLib -E 'Devel::SourceLib::perl5lib'` prove -MDevel::SourceLib '
 function devel_sourcelib { IFS=':'; for i in $DEVEL_SOURCELIB; do echo "prove $i/*/t/*.t"; done; }
 function devel_sourcelib_perl5lib { export PERL5LIB=`perl -MDevel::SourceLib -E 'Devel::SourceLib::perl5lib'`; }
+function pull-upstream {
+  d=`pwd`
+  unset IFS
+  for i in $(find /var/mojo/libs/${1:-$DEVEL_SOURCELIB_MODE} -wholename "*/.git/config" -print0 | xargs -0 grep -l remotes/upstream | sed 's/\/.git\/config//'); do
+    echo $i
+    cd $i > /dev/null && git pull upstream master 2>/dev/null || echo Error > /dev/stderr
+  done
+  cd $d > /dev/null
+}
 echo "A collection of git-backed Perl libraries is stored at $DEVEL_SOURCELIB"
 echo "These modules may not be on CPAN at all, and the CPAN (or even GitHub) versions are most certainly not up to date."
 echo "Simply 'use Devel::SourceLib;' in your program to add these repos to your search path."
@@ -30,5 +39,3 @@ echo "...or 'devel_sourcelib' for short"
 echo "Alternatively, you can set PERL5LIB to contain the paths to each of the repos in your collection.  You can use Devel::SourceLib for this, too."
 echo "The perl5lib function in Devel::SourceLib will export all of the repos in your collection to the PERL5LIB environment.  'perl -MDevel::SourceLib -E 'Devel::SourceLib::perl5lib''"
 echo "...or 'devel_sourcelib_perl5lib for short"
-echo
-echo "No making changes in prod.  Stay on master branch and DON'T. TOUCH. ANYTHING."
