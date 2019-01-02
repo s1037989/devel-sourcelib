@@ -1,7 +1,7 @@
 export DEVEL_SOURCELIB=/var/mojo/libs/prod:/var/mojo/libs/qa
 export PERL5LIB=$PERL5LIB:/var/mojo/libs/prod/Devel-SourceLib/lib
 
-. ${0%/*}/env
+. /var/mojo/libs/env
 
 echo
 echo "No making changes in prod.  Stay on master branch and DON'T. TOUCH. ANYTHING."
