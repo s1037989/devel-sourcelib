@@ -1,0 +1,14 @@
+export DEVEL_SOURCELIB_DEBUG=0
+export DEVEL_SOURCELIB=/var/mojo/libs/dev
+export PERL5LIB=$PERL5LIB:/var/mojo/libs/dev/Devel-SourceLib/lib
+alias perl='perl -MDevel::SourceLib '
+alias prove='prove -MDevel::SourceLib '
+function devel_sourcelib { prove $DEVEL_SOURCELIB/*/t/*.t; }
+echo "A collection of git-backed Perl libraries is stored at $DEVEL_SOURCELIB"
+echo "These modules may not be on CPAN at all, and the CPAN (or even GitHub) versions are most certainly not up to date."
+echo "Simply 'use Devel::SourceLib;' in your program to add these repos to your search path."
+echo "'perl' and 'prove' have been aliased for you to automatically add '-MDevel::SourceLib'"
+echo "Feel free to set DEVEL_SOURCELIB env variable to a different path.  Each 'perl' execution can point to a totally different collection."
+echo "Use 'prove' to run all the tests of all the repos in your collection, and pass extra options to prove to narrow the focus of what gets tested each run (the number of tests can grow very large in a collection of repos)."
+echo "prove $DEVEL_SOURCELIB/*/t/*.t"
+echo "...or 'devel_sourcelib' for short"
