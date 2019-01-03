@@ -3,7 +3,9 @@ export DEVEL_SOURCELIB_DEBUG=0
 export DEVEL_SOURCELIB=/var/mojo-${DEVEL_SOURCELIB_MODE:-dev}/libs
 export DEVEL_SOURCELIB_PATH=/var/mojo-${DEVEL_SOURCELIB_MODE:-dev}/libs/devel-sourcelib/lib
 
-[ -z "$SSH_AGENT_PID" ] && { eval `ssh-agent` ; shopt -s extglob ; ssh-add ~/.ssh/id_!(*.pub) ; shopt -u extglob ; }
+shopt -s extglob
+[ -z "$SSH_AGENT_PID" ] && { eval `ssh-agent` ; ssh-add ~/.ssh/id_!(*.pub) ; }
+shopt -u extglob
 
 export PATH=`perl -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib -E 'Devel::SourceLib::binpath'`
 alias perl='`which perl` -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib '
