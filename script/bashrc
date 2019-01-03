@@ -1,0 +1,50 @@
+export DEVEL_SOURCELIB_MODE=dev
+export DEVEL_SOURCELIB_DEBUG=0
+export DEVEL_SOURCELIB=/var/mojo-${DEVEL_SOURCELIB_MODE:-dev}/libs
+export DEVEL_SOURCELIB_PATH=/var/mojo-${DEVEL_SOURCELIB_MODE:-dev}/libs/devel-sourcelib/lib
+
+[ -z "$SSH_AGENT_PID" ] && { eval `ssh-agent` ; shopt -s extglob ; ssh-add ~/.ssh/id_!(*.pub) ; shopt -u extglob ; }
+
+export PATH=`perl -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib -E 'Devel::SourceLib::binpath'`
+alias perl='`which perl` -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib '
+alias mojo='`which perl` -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib `which mojo` '
+alias prove='env PERL5LIB=`perl -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib -E "Devel::SourceLib::perl5lib"` prove -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib '
+function devel_sourcelib_prove { IFS=':'; for i in $DEVEL_SOURCELIB; do echo "prove $i/*/t/*.t"; done; unset IFS; }
+function devel_sourcelib_perl5lib { export PERL5LIB=`perl -I$DEVEL_SOURCELIB_PATH -MDevel::SourceLib -E 'Devel::SourceLib::perl5lib'`; }
+function pull-upstream {
+  d=`pwd`
+  unset IFS
+  for i in $(find /var/mojo-${DEVEL_SOURCELIB_MODE:-dev}/libs -wholename "*/.git/config" -print0 | xargs -0 grep -l remotes/upstream | sed 's/\/.git\/config//'); do
+    echo $i
+    cd $i > /dev/null && git pull upstream master 2>/dev/null || echo Error > /dev/stderr
+  done
+  cd $d > /dev/null
+}
+echo "A collection of git-backed Perl libraries is stored at $DEVEL_SOURCELIB"
+echo "These modules may not be on CPAN at all, and the CPAN (or even GitHub) versions are most certainly not up to date."
+echo "Simply 'use Devel::SourceLib;' in your program to add these repos to your search path."
+echo "'perl' and 'prove' have been aliased for you to automatically add '-MDevel::SourceLib'"
+echo "Feel free to set DEVEL_SOURCELIB env variable to a different path.  Each 'perl' execution can point to a totally different collection."
+echo
+echo "Use 'prove' to run all the tests of all the repos in your collection, and pass extra options to prove to narrow the focus of what gets tested each run (the number of tests can grow very large in a collection of repos)."
+IFS=':'; for i in $DEVEL_SOURCELIB; do
+  echo "prove $i/*/t/*.t"
+done
+unset IFS
+echo "...or 'devel_sourcelib_prove' for short"
+echo
+echo "Alternatively, you can set PERL5LIB to contain the paths to each of the repos in your collection.  You can use Devel::SourceLib for this, too."
+echo "The perl5lib function in Devel::SourceLib will export all of the repos in your collection to the PERL5LIB environment.  'perl -MDevel::SourceLib -E 'Devel::SourceLib::perl5lib''"
+echo "...or 'devel_sourcelib_perl5lib for short"
+
+echo
+if [ "${DEVEL_SOURCELIB_MODE:-dev}" == "dev" ]; then
+  echo "Only make changes in dev.  STAY. AWAY. FROM. MASTER. branch."
+  #PS1=[highlight dev in pwd, show branch, highlight if wrong branch]
+elif [ "${DEVEL_SOURCELIB_MODE:-dev}" == "qa" ]; then
+  echo "No making changes in qa.  Stay on master branch and DON'T. TOUCH. ANYTHING."
+  #PS1=[highlight qa in pwd, show branch, highlight if wrong branch]
+elif [ "${DEVEL_SOURCELIB_MODE:-dev}" == "prod" ]; then
+  echo "No making changes in prod.  Stay on master branch and DON'T. TOUCH. ANYTHING."
+  #PS1=[highlight prod in pwd, show branch, highlight if wrong branch]
+fi

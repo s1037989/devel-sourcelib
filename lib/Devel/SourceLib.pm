@@ -1,10 +1,14 @@
 package Devel::SourceLib;
 
-use List::MoreUtils 'uniq';
-
 BEGIN {
   use Mojo::File 'path';
+  use List::MoreUtils 'uniq';
   use constant DEBUG => $ENV{DEVEL_SOURCELIB_DEBUG} || 0;
+}
+
+sub import {
+  my $class = shift;
+  $ENV{DEVEL_SOURCELIB} = join ':', $ENV{DEVEL_SOURCELIB}, @_;
   our @BINPATH = split /:/, $ENV{PATH};
   return unless $ENV{DEVEL_SOURCELIB};
   warn "DEVEL_SOURCELIB=$ENV{DEVEL_SOURCELIB}\n" if DEBUG;
